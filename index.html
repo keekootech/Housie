@@ -666,6 +666,60 @@ const PRIZES=[
  {id:'corner',n:'Four corners',h:'The four ends'},
  {id:'full',n:'Full housie',h:'Every number'}];
 
+/* ---------- remembering your seat across a refresh ---------- */
+const SKEY='housie.session';
+function saveSession(){
+  if(!room||solo)return;
+  try{
+    localStorage.setItem(SKEY,JSON.stringify({
+      id:me.id,name:me.name,room,marked:[...marked],ts:Date.now()
+    }));
+  }catch(e){}
+}
+function loadSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SKEY)||'null');
+    if(!s||Date.now()-s.ts>6*3600e3)return null;   /* stale after 6 hours */
+    return s;
+  }catch(e){return null}
+}
+function clearSession(){try{localStorage.removeItem(SKEY)}catch(e){}}
+
+async function tryResume(s){
+  const snap=await fx.get(R('rooms/'+s.room));
+  if(!snap.exists()){log('old room gone');clearSession();return}
+  const r=snap.val();
+  if(!r.players||!r.players[s.id]){log('no longer in that room');clearSession();return}
+
+  me.id=s.id;me.name=s.name;room=s.room;
+  isHost=(r.host===me.id);
+  ticket=decT(r.players[s.id].ticket);        /* server's copy is the real one */
+  marked=new Set(s.marked||[]);
+  called=new Set(Object.values(r.called||{}).filter(n=>typeof n==='number'));
+  claims=r.claims||{};                        /* prefill so old wins don't re-announce */
+  hostId=r.host;
+  mode=r.mode||'auto';
+  setLang(r.lang||'en',false);
+  setGap(r.gap||6,false);
+
+  await fx.set(R(`rooms/${room}/players/${me.id}/gone`),null).catch(()=>{});
+  fx.onDisconnect(R(`rooms/${room}/players/${me.id}/gone`)).set(true);
+
+  log(`resumed ${room} as ${me.name}, ${called.size} numbers already called`);
+
+  if(r.status==='playing'){
+    started=true;
+    $('lobCode').textContent=room;
+    listen();
+    beginGame();
+    drawWonStrip();
+    toast('Welcome back — you kept your ticket');
+  }else{
+    enterLobby();
+    toast('Welcome back');
+  }
+}
+
 let me={id:'p'+Math.random().toString(36).slice(2,9),name:'Player'};
 let room=null,isHost=false,solo=false,mode='auto',started=false;
 let ticket=null,marked=new Set(),called=new Set(),claims={},players={};
@@ -706,6 +760,7 @@ async function hostGame(){
   });
   room=code;isHost=true;solo=false;
   log('hosted room '+code);
+  saveSession();
   fx.onDisconnect(R(`rooms/${code}/players/${me.id}/gone`)).set(true);
   enterLobby();
 }
@@ -723,6 +778,7 @@ async function joinGame(){
   await fx.set(R(`rooms/${code}/players/${me.id}`),{name:me.name,ticket:encT(ticket),joined:Date.now()});
   room=code;isHost=false;solo=false;
   log('joined room '+code);
+  saveSession();
   fx.onDisconnect(R(`rooms/${code}/players/${me.id}/gone`)).set(true);
   enterLobby();
 }
@@ -912,7 +968,7 @@ async function startGame(){
 }
 
 function leave(){
-  stopAuto();clearListeners();
+  stopAuto();clearListeners();clearSession();
   if(online&&room){try{fx.set(R(`rooms/${room}/players/${me.id}`),null)}catch(e){}}
   room=null;isHost=false;started=false;solo=false;
   called=new Set();marked=new Set();claims={};
@@ -948,7 +1004,7 @@ function drawTicket(){const tb=$('tk').querySelector('tbody');tb.innerHTML='';
         else if(called.has(n))td.classList.add('live');
         td.onclick=()=>{if(marked.has(n)){marked.delete(n);blip(300,.07)}
           else{marked.add(n);blip(called.has(n)?880:420,.1)}
-          drawTicket();drawClaims();broadcastProgress()}}
+          drawTicket();drawClaims();broadcastProgress();saveSession()}}
       tr.appendChild(td)});
     tb.appendChild(tr)})}
 
@@ -1154,6 +1210,15 @@ $('codeIn').oninput=e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A
 /* prefill room code from a shared link */
 const qs=new URLSearchParams(location.search).get('room');
 if(qs){$('codeIn').value=qs.toUpperCase().slice(0,4);log('code from link: '+qs)}
+
+/* come back to whatever we were doing before the refresh */
+const sess=loadSession();
+if(sess){
+  $('nameIn').value=sess.name||'';
+  if(online&&sess.room&&!qs){
+    tryResume(sess).catch(e=>{log('resume failed: '+e.message,true);clearSession()});
+  }
+}
 
 drum();
 log('ready');

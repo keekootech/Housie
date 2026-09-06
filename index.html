@@ -1073,10 +1073,14 @@ $('bHost').onclick=()=>{ac();hostGame().catch(e=>{log('host fail '+e.message,tru
 $('bJoin').onclick=()=>{ac();joinGame().catch(e=>{log('join fail '+e.message,true);toast('Could not join',true)})};
 $('bSolo').onclick=()=>{ac();solo=true;isHost=true;started=true;me.name='You';
   ticket=newTicket();called=new Set();marked=new Set();claims={};beginGame()};
-$('lHi').onclick=()=>setLang('hi',true);
-$('lEn').onclick=()=>setLang('en',true);
-$('gHi').onclick=()=>{setLang('hi',true);speak(88)};
-$('gEn').onclick=()=>{setLang('en',true);speak(88)};
+function preview(){
+  if(running||rolling)return;            /* never talk over a live call */
+  const s=sound;sound=true;speak(88);sound=s;
+}
+$('lHi').onclick=()=>{setLang('hi',true);preview()};
+$('lEn').onclick=()=>{setLang('en',true);preview()};
+$('gHi').onclick=()=>{setLang('hi',true);toast('Hindi calls from the next number')};
+$('gEn').onclick=()=>{setLang('en',true);toast('English calls from the next number')};
 $('bLock').onclick=()=>toggleLock().catch(e=>log('lock fail '+e.message,true));
 $('bStart').onclick=()=>startGame().catch(e=>log('start fail '+e.message,true));
 $('bLeave').onclick=leave;
@@ -1143,8 +1147,7 @@ $('main').onclick=()=>{
 
 $('snd').onclick=()=>{sound=!sound;$('snd').textContent=sound?'🔊':'🔇';
   if(!sound&&window.speechSynthesis)speechSynthesis.cancel()};
-$('voice').onchange=e=>{voiceManual=true;voice=voices[e.target.value];
-  const s=sound;sound=true;speak(88);sound=s};
+$('voice').onchange=e=>{voiceManual=true;voice=voices[e.target.value];preview()};
 
 $('codeIn').oninput=e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'')};
 

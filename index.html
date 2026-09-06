@@ -292,6 +292,28 @@ td.live{background:var(--marigold);animation:live 1.1s ease-in-out infinite}
 .wait{text-align:center;color:rgba(251,239,214,.7);font-size:14px;padding:16px 0;font-weight:600}
 .wait b{color:var(--marigold)}
 
+/* ============ speed slider ============ */
+.speed{background:var(--baize-dk);border-radius:12px;padding:11px 14px 6px;margin-bottom:10px;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.35)}
+.slab{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.slab span{flex:1;font-size:13px;color:rgba(251,239,214,.7);font-weight:700}
+.slab b{font-family:'Alfa Slab One',serif;font-weight:400;font-size:18px;color:var(--marigold)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;
+  margin:0;padding:8px 0;border:none;border-radius:0}
+input[type=range]:focus{outline:none}
+input[type=range]:focus-visible{outline:3px solid var(--marigold);outline-offset:4px}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;
+  background:linear-gradient(90deg,var(--ink),var(--marigold));box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-track{height:8px;border-radius:99px;
+  background:linear-gradient(90deg,var(--ink),var(--marigold))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;
+  border-radius:50%;margin-top:-9px;border:none;
+  background:radial-gradient(circle at 36% 30%,#FFFDF7,#F3E4C4 60%,#BFA97F);
+  box-shadow:0 3px 5px rgba(0,0,0,.45)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;border:none;
+  background:radial-gradient(circle at 36% 30%,#FFFDF7,#F3E4C4 60%,#BFA97F);
+  box-shadow:0 3px 5px rgba(0,0,0,.45)}
+
 /* ============ banner + toast ============ */
 .banner{
   position:fixed;left:0;right:0;top:0;z-index:65;padding:22px 16px 24px;text-align:center;
@@ -369,10 +391,20 @@ summary::-webkit-details-marker{display:none}
   <div class="plist" id="lobPlayers"></div>
   <div id="hostBox">
     <div class="row">
+      <div class="seg" role="group" aria-label="Calling language">
+        <button id="lHi" aria-pressed="false">हिंदी calls</button>
+        <button id="lEn" aria-pressed="true">English calls</button>
+      </div>
+    </div>
+    <div class="row">
       <div class="seg" role="group">
         <button id="mAuto" aria-pressed="true">Auto call</button>
         <button id="mHost" aria-pressed="false">I'll call</button>
       </div>
+    </div>
+    <div class="speed" id="speedBox">
+      <div class="slab"><span>Gap between calls</span><b id="speedVal">6s</b></div>
+      <input type="range" id="speed" min="3" max="20" step="1" value="6">
     </div>
     <button class="go" id="bStart">Start game</button>
   </div>
@@ -393,6 +425,12 @@ summary::-webkit-details-marker{display:none}
     <div class="trail" id="trail"></div>
   </div>
   <div class="wonstrip" id="wonstrip"></div>
+  <div class="row" id="glangrow">
+    <div class="seg" role="group" aria-label="Calling language">
+      <button id="gHi" aria-pressed="false">हिंदी calls</button>
+      <button id="gEn" aria-pressed="true">English calls</button>
+    </div>
+  </div>
   <div class="row" style="margin-top:12px">
     <div class="seg" role="group" id="gseg">
       <button id="gAuto" aria-pressed="true">Auto call</button>
@@ -401,6 +439,10 @@ summary::-webkit-details-marker{display:none}
     <button class="mini" id="snd" aria-label="Sound">🔊</button>
   </div>
   <select id="voice" aria-label="Caller voice"></select>
+  <div class="speed" id="gspeedBox">
+    <div class="slab"><span>Gap between calls</span><b id="gspeedVal">6s</b></div>
+    <input type="range" id="gspeed" min="3" max="20" step="1" value="6">
+  </div>
   <div class="controls"><button class="go" id="main">Start game</button></div>
   <div class="ticket">
     <div class="tkhead"><div class="tn">Housie ticket</div><div class="ts" id="tkSerial">No. 0000</div></div>
@@ -539,29 +581,66 @@ function blip(f,d,type,vol){if(!sound)return;
 function fanfare(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>blip(f,.28,'square',.13),i*95))}
 function buzz(){blip(150,.22,'sawtooth',.14);setTimeout(()=>blip(110,.26,'sawtooth',.14),110)}
 
-let voices=[],voice=null;
-function rank(v){const l=(v.lang||'').toLowerCase();
-  if(l.startsWith('hi'))return 0;
-  if(l.startsWith('en-in'))return 1;
-  if(/india|hindi|lekha|rishi|veena|kalpana|heera/i.test(v.name))return 1;
-  if(l.startsWith('en'))return 2;return 3}
-function loadVoices(){if(!window.speechSynthesis)return;
-  voices=speechSynthesis.getVoices().slice().sort((a,b)=>rank(a)-rank(b));
+let voices=[],voice=null,lang='en',voiceManual=false;
+
+function scoreVoice(v,want){
+  const l=(v.lang||'').toLowerCase(),n=v.name||'';
+  if(want==='hi'){
+    if(l.startsWith('hi'))return 0;
+    if(/lekha|rishi|kalpana|hindi/i.test(n))return 1;
+    if(l.startsWith('en-in'))return 2;
+    if(/india/i.test(n))return 3;
+    return 9;
+  }
+  if(l.startsWith('en-in'))return 0;
+  if(/rishi|veena|india/i.test(n))return 1;
+  if(l.startsWith('en-gb'))return 2;
+  if(l.startsWith('en'))return 3;
+  return 9;
+}
+function loadVoices(){
+  if(!window.speechSynthesis)return;
+  voices=speechSynthesis.getVoices().slice();
   if(!voices.length)return;
+  voices.sort((a,b)=>scoreVoice(a,lang)-scoreVoice(b,lang));
   const s=$('voice');
   s.innerHTML=voices.map((v,i)=>`<option value="${i}">${v.name.replace(/Microsoft |Google /,'')} · ${v.lang}</option>`).join('');
-  if(!voice){voice=voices[0];s.value=0}
-  s.style.display=voices.length>1?'block':'none'}
+  if(!voiceManual){voice=voices[0];s.value=0}
+  s.style.display=voices.length>1?'block':'none';
+}
 if(window.speechSynthesis){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
-function speak(n){if(!sound||!window.speechSynthesis)return;
-  const nk=NICK[n],hi=voice&&(voice.lang||'').toLowerCase().startsWith('hi');
+
+let warnedNoHindi=false;
+function setLang(L,push){
+  lang=L;voiceManual=false;loadVoices();
+  ['lHi','gHi'].forEach(id=>$(id)&&$(id).setAttribute('aria-pressed',L==='hi'));
+  ['lEn','gEn'].forEach(id=>$(id)&&$(id).setAttribute('aria-pressed',L==='en'));
+  if(L==='hi'&&voice&&!(voice.lang||'').toLowerCase().startsWith('hi')&&!warnedNoHindi){
+    warnedNoHindi=true;
+    toast('No Hindi voice on this phone — using the closest one');
+    log('no hi voice, fell back to '+(voice&&voice.lang));
+  }
+  if(push&&!solo&&room&&isHost)fx.set(R(`rooms/${room}/lang`),L).catch(()=>{});
+}
+
+function speak(n){
+  if(!sound||!window.speechSynthesis)return;
+  const nk=NICK[n];
+  const useHi=lang==='hi'&&voice&&(voice.lang||'').toLowerCase().startsWith('hi');
   let line;
-  if(hi){const num=n<=20?HINDI_NUM[n]:String(n);line=nk?`${nk.h||nk.e}, ${num}`:`${num}`}
-  else{const d=n<10?`Number ${n}`:`${String(n)[0]} ${String(n)[1]}, ${n}`;line=nk?`${nk.e}, ${n}`:d}
+  if(lang==='hi'){
+    const num=useHi?(n<=20?HINDI_NUM[n]:String(n)):String(n);
+    const name=nk?(useHi?(nk.h||nk.e):(nk.e)):'';
+    line=name?`${name}, ${num}`:`${num}`;
+  }else{
+    const d=n<10?`Number ${n}`:`${String(n)[0]} ${String(n)[1]}, ${n}`;
+    line=nk?`${nk.e}, ${n}`:d;
+  }
   const u=new SpeechSynthesisUtterance(line);
   if(voice){u.voice=voice;u.lang=voice.lang}
-  u.rate=hi?.92:.95;u.pitch=1.05;
-  speechSynthesis.cancel();speechSynthesis.speak(u)}
+  u.rate=useHi?.9:.95;u.pitch=1.05;
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+}
 
 /* ---------- confetti ---------- */
 const cv=$('fx'),cx=cv.getContext('2d');let bits=[];
@@ -622,7 +701,7 @@ async function hostGame(){
   }
   ticket=newTicket();
   await fx.set(R('rooms/'+code),{
-    host:me.id,status:'lobby',mode:'auto',created:Date.now(),
+    host:me.id,status:'lobby',mode:'auto',lang:'en',gap:6,created:Date.now(),
     players:{[me.id]:{name:me.name,ticket:encT(ticket),joined:Date.now()}}
   });
   room=code;isHost=true;solo=false;
@@ -676,6 +755,12 @@ function listen(){
   unsub.push(fx.onValue(R(`rooms/${room}/status`),s=>{
     const st=s.val();
     if(st==='playing'&&!started){started=true;beginGame()}
+  }));
+  unsub.push(fx.onValue(R(`rooms/${room}/gap`),s=>{
+    setGap(s.val()||6,false);
+  }));
+  unsub.push(fx.onValue(R(`rooms/${room}/lang`),s=>{
+    setLang(s.val()||'en',false);
   }));
   unsub.push(fx.onValue(R(`rooms/${room}/mode`),s=>{
     mode=s.val()||'auto';syncModeUI();
@@ -840,7 +925,7 @@ function leave(){
 function beginGame(){
   show('sGame');
   drum();drawTicket();drawClaims();drawBoard();drawTrail();renderScoreboard();
-  syncModeUI();
+  syncModeUI();updateMainBtn();
   $('callline').textContent=isHost||solo?'Tap start — good luck':'Waiting for the host…';
   log('entering game, host='+isHost);
 }
@@ -931,16 +1016,21 @@ function showBall(n){
     speak(n);
     if(ticket&&ticket.flat().includes(n))burst(14,7);
     drawTrail();drawBoard();drawTicket();drawClaims();
-    broadcastProgress();
+    broadcastProgress();updateMainBtn();
     rolling=false},900);
 }
 
-function startAuto(){stopAuto();timer=setInterval(pickNumber,6500)}
-function stopAuto(){clearInterval(timer);timer=null}
+let gap=6500;
+function startAuto(){clearInterval(timer);timer=setInterval(pickNumber,gap)}
+function stopAuto(){clearInterval(timer);timer=null;running=false;
+  if(started||solo)updateMainBtn()}
 
 function syncModeUI(){
   const canCall=isHost||solo;
   $('gseg').style.display=canCall?'flex':'none';
+  $('glangrow').style.display=canCall?'flex':'none';
+  $('gspeedBox').style.display=canCall&&mode==='auto'?'block':'none';
+  const sb=$('speedBox');if(sb)sb.style.display=mode==='auto'?'block':'none';
   $('main').style.display=canCall?'block':'none';
   $('gAuto').setAttribute('aria-pressed',mode==='auto');
   $('gHost').setAttribute('aria-pressed',mode!=='auto');
@@ -983,6 +1073,10 @@ $('bHost').onclick=()=>{ac();hostGame().catch(e=>{log('host fail '+e.message,tru
 $('bJoin').onclick=()=>{ac();joinGame().catch(e=>{log('join fail '+e.message,true);toast('Could not join',true)})};
 $('bSolo').onclick=()=>{ac();solo=true;isHost=true;started=true;me.name='You';
   ticket=newTicket();called=new Set();marked=new Set();claims={};beginGame()};
+$('lHi').onclick=()=>setLang('hi',true);
+$('lEn').onclick=()=>setLang('en',true);
+$('gHi').onclick=()=>{setLang('hi',true);speak(88)};
+$('gEn').onclick=()=>{setLang('en',true);speak(88)};
 $('bLock').onclick=()=>toggleLock().catch(e=>log('lock fail '+e.message,true));
 $('bStart').onclick=()=>startGame().catch(e=>log('start fail '+e.message,true));
 $('bLeave').onclick=leave;
@@ -995,29 +1089,62 @@ $('bShare').onclick=async()=>{
   else{try{await navigator.clipboard.writeText(text);toast('Invite copied!')}catch(e){toast(room)}}
 };
 
+function setGap(secs,push){
+  gap=Math.max(3,Math.min(20,secs))*1000;
+  const s=Math.round(gap/1000);
+  ['speed','gspeed'].forEach(id=>{const el=$(id);if(el)el.value=s});
+  ['speedVal','gspeedVal'].forEach(id=>{const el=$(id);if(el)el.textContent=s+'s'});
+  if(running&&mode==='auto')startAuto();
+  if(push&&!solo&&room&&isHost)fx.set(R(`rooms/${room}/gap`),s).catch(()=>{});
+}
+['speed','gspeed'].forEach(id=>{
+  const el=$(id);
+  el.oninput=e=>{
+    const s=+e.target.value;
+    ['speedVal','gspeedVal'].forEach(v=>$(v).textContent=s+'s');
+  };
+  el.onchange=e=>setGap(+e.target.value,true);
+});
+
+let running=false;
+
+function updateMainBtn(){
+  const b=$('main');
+  const left=90-called.size;
+  if(left===0){b.textContent='All numbers called';b.disabled=true;return}
+  b.disabled=false;
+  if(mode==='host'){
+    b.textContent=called.size?'Call next number':'Call first number';
+    return;
+  }
+  if(running)b.textContent='Pause';
+  else b.textContent=called.size?'Resume':'Start calling';
+}
+
 function setMode(m){
   mode=m;syncModeUI();
-  if(!solo&&isHost)fx.set(R(`rooms/${room}/mode`),m);
+  if(!solo&&isHost&&room)fx.set(R(`rooms/${room}/mode`),m).catch(()=>{});
   stopAuto();
-  if(started&&m==='auto'&&$('main').textContent!=='Start game')startAuto();
-  $('main').textContent=m==='auto'?($('main').textContent==='Start game'?'Start game':'Pause'):'Call next number';
+  if(m==='auto'&&running)startAuto();
+  updateMainBtn();
 }
 $('mAuto').onclick=()=>setMode('auto');
 $('mHost').onclick=()=>setMode('host');
 $('gAuto').onclick=()=>setMode('auto');
 $('gHost').onclick=()=>setMode('host');
 
-let running=false;
 $('main').onclick=()=>{
   ac();
-  if(mode==='host'){pickNumber();$('main').textContent='Call next number';return}
-  if(!running){running=true;$('main').textContent='Pause';pickNumber();startAuto()}
-  else{running=false;stopAuto();$('main').textContent='Resume'}
+  if(mode==='host'){pickNumber();updateMainBtn();return}
+  if(running){running=false;stopAuto()}
+  else{running=true;pickNumber();startAuto()}
+  updateMainBtn();
 };
 
 $('snd').onclick=()=>{sound=!sound;$('snd').textContent=sound?'🔊':'🔇';
   if(!sound&&window.speechSynthesis)speechSynthesis.cancel()};
-$('voice').onchange=e=>{voice=voices[e.target.value];const s=sound;sound=true;speak(88);sound=s};
+$('voice').onchange=e=>{voiceManual=true;voice=voices[e.target.value];
+  const s=sound;sound=true;speak(88);sound=s};
 
 $('codeIn').oninput=e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'')};
 

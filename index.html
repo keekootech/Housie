@@ -751,13 +751,20 @@ window.onunhandledrejection=e=>{log('PROMISE '+(e.reason&&e.reason.message||e.re
 log('booting');
 
 /* ---------- firebase ---------- */
-let DB=null,fx=null,online=false;
+let me={id:'p'+Math.random().toString(36).slice(2,9),name:'Player'};
+let DB=null,fx=null,online=false,authed=false;
 if(FIREBASE_CONFIG.databaseURL){
   try{
     const A=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
     const D=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-    DB=D.getDatabase(A.initializeApp(FIREBASE_CONFIG));
-    fx=D;online=true;log('firebase connected');
+    const U=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const app=A.initializeApp(FIREBASE_CONFIG);
+    DB=D.getDatabase(app);fx=D;online=true;
+    const auth=U.getAuth(app);
+    const cred=await U.signInAnonymously(auth);
+    me.id=cred.user.uid;            /* same id every visit on this device */
+    authed=true;
+    log('firebase connected as '+me.id.slice(0,8));
   }catch(e){log('firebase failed: '+e.message,true)}
 }else{ log('no firebase config — solo only'); }
 if(!online){
@@ -1232,7 +1239,7 @@ async function playAgain(){
   log('rematch');
 }
 
-let me={id:'p'+Math.random().toString(36).slice(2,9),name:'Player'};
+
 let room=null,isHost=false,solo=false,mode='auto',started=false;
 let ticket=null,marked=new Set(),called=new Set(),claims={},players={};
 let timer=null,rolling=false,unsub=[];
@@ -1705,6 +1712,7 @@ $('bBack').onclick=()=>show('sHome');
 $('bDo').onclick=()=>{
   ac();
   if(!$('nameIn').value.trim()){toast('Type your name first',true);$('nameIn').focus();return}
+  if(!authed&&online){toast('Still connecting — one second',true);return}
   if(flow==='host')hostGame().catch(e=>{log('host fail '+e.message,true);toast('Could not create room',true)});
   else joinGame().catch(e=>{log('join fail '+e.message,true);toast('Could not join',true)});
 };

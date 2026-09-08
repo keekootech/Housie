@@ -364,6 +364,20 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bor
   background:radial-gradient(circle at 36% 30%,#FFFDF7,#F3E4C4 60%,#BFA97F);
   box-shadow:0 3px 5px rgba(0,0,0,.45)}
 
+/* ============ tap nudge ============ */
+.nudge{
+  display:none;margin:16px 0 -8px;padding:11px 14px;border-radius:12px 12px 0 0;
+  background:linear-gradient(180deg,#FFC048,var(--marigold));color:#3A2400;
+  font-size:14px;font-weight:800;text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+  animation:nudgein .35s cubic-bezier(.3,1.3,.5,1);
+}
+.nudge.on{display:block}
+.nudge b{font-family:'Alfa Slab One',serif;font-weight:400;font-size:17px;letter-spacing:1px}
+.nudge .arrow{display:block;font-size:16px;margin-top:1px;animation:point 1s infinite}
+@keyframes point{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@keyframes nudgein{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:none}}
+
 /* ============ first-time tour ============ */
 .tour{position:fixed;inset:0;z-index:80;display:none}
 .tour.on{display:block}
@@ -549,6 +563,7 @@ summary::-webkit-details-marker{display:none}
     <input type="range" id="gspeed" min="3" max="20" step="1" value="6">
   </div>
   <div class="controls"><button class="go" id="main">Start game</button></div>
+  <div class="nudge" id="nudge"></div>
   <div class="ticket">
     <div class="tkhead"><div class="tn">Housie ticket</div><div class="ts" id="tkSerial">No. 0000</div></div>
     <table id="tk"><tbody></tbody></table>
@@ -1229,6 +1244,16 @@ function drum(){const d=$('drum');d.innerHTML='<div class="drum-lip"></div>';
     b.style.left=(i*19+6)+'px';b.style.top=(i%3*11+6)+'px';
     b.style.animationDelay=(i*.13)+'s';d.appendChild(b)}}
 
+function drawNudge(){
+  const el=$('nudge');if(!el||!ticket)return;
+  const pending=ticket.flat().filter(n=>n&&called.has(n)&&!marked.has(n));
+  if(!pending.length){el.className='nudge';return}
+  el.className='nudge on';
+  el.innerHTML=pending.length===1
+    ? `Tap <b>${pending[0]}</b> on your ticket<span class="arrow">👇</span>`
+    : `Tap <b>${pending.join('  ')}</b> on your ticket<span class="arrow">👇</span>`;
+}
+
 function drawTicket(){const tb=$('tk').querySelector('tbody');tb.innerHTML='';
   if(!ticket)return;
   const ser=$('tkSerial');
@@ -1243,7 +1268,8 @@ function drawTicket(){const tb=$('tk').querySelector('tbody');tb.innerHTML='';
           else{marked.add(n);blip(called.has(n)?880:420,.1)}
           drawTicket();drawClaims();broadcastProgress();saveSession()}}
       tr.appendChild(td)});
-    tb.appendChild(tr)})}
+    tb.appendChild(tr)});
+  drawNudge()}
 
 function drawClaims(){const w=$('claims');w.innerHTML='';
   PRIZES.forEach(p=>{const b=document.createElement('button');
@@ -1313,7 +1339,17 @@ function showBall(n){
     const cl=$('callline');cl.textContent=NICK[n]?NICK[n].e:`Number ${n}`;
     cl.classList.remove('in');void cl.offsetWidth;cl.classList.add('in');
     speak(n);
-    if(ticket&&ticket.flat().includes(n))burst(14,7);
+    if(ticket&&ticket.flat().includes(n)){
+      burst(14,7);
+      toast(`${n} is on your ticket — tap it!`);
+      if(sound&&window.speechSynthesis){
+        setTimeout(()=>{
+          const u=new SpeechSynthesisUtterance(lang==='hi'?'आपका नंबर है, दबाइए':'That one is yours, tap it');
+          if(voice){u.voice=voice;u.lang=voice.lang}
+          u.rate=1;u.pitch=1.1;speechSynthesis.speak(u);
+        },1300);
+      }
+    }
     drawTrail();drawBoard();drawTicket();drawClaims();
     broadcastProgress();updateMainBtn();
     rolling=false},900);

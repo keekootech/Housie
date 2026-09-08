@@ -204,9 +204,6 @@ input:focus{outline:none;border-bottom-color:var(--ink)}
 .seg button:active{transform:none;box-shadow:none}
 .seg button[aria-pressed="true"]{background:var(--marigold);color:#3A2400;box-shadow:0 2px 0 var(--marigold-dk)}
 .mini{flex:0 0 52px;width:52px;padding:12px 0;font-size:18px;margin:0}
-#voice{width:100%;margin-bottom:9px;display:none;background:var(--baize-dk);
-  color:var(--paper-dk);border:1.5px solid rgba(251,239,214,.18);border-radius:11px;
-  padding:12px;font-family:Archivo;font-weight:700;font-size:13.5px}
 
 /* ============ THE TICKET — the hero ============ */
 .ticket{
@@ -363,6 +360,79 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;border:none;
   background:radial-gradient(circle at 36% 30%,#FFFDF7,#F3E4C4 60%,#BFA97F);
   box-shadow:0 3px 5px rgba(0,0,0,.45)}
+
+/* ============ results ============ */
+.restitle{font-size:11.5px;font-weight:800;letter-spacing:2px;color:rgba(251,239,214,.5);
+  margin:18px 0 8px 3px}
+.reslist{display:flex;flex-direction:column;gap:7px}
+.rrow{display:flex;align-items:center;gap:10px;background:var(--paper);color:var(--charcoal);
+  border-radius:11px;padding:12px 13px;box-shadow:0 4px 0 rgba(0,0,0,.2);animation:pop .3s}
+.rrow.none{background:rgba(0,0,0,.22);color:rgba(251,239,214,.5);box-shadow:none}
+.rrow .rp{flex:1;font-weight:800;font-size:14px}
+.rrow .rw{font-size:12.5px;font-weight:700;color:#6B5B40}
+.rrow .rv{font-family:'Alfa Slab One',serif;font-weight:400;font-size:17px;color:var(--ink)}
+.rrow.mine{border-left:5px solid var(--ink)}
+.rrow .rk{flex:0 0 30px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:var(--marigold);color:#3A2400;font-family:'Alfa Slab One',serif;font-size:14px}
+.rrow.gold .rk{background:linear-gradient(180deg,#FFD75E,var(--marigold))}
+#moneyWrap{display:none}
+#moneyWrap.on{display:block}
+
+/* ============ credit ============ */
+.credit{
+  text-align:center;margin:26px 0 4px;font-size:12px;font-weight:700;
+  color:rgba(251,239,214,.42);letter-spacing:.3px;
+}
+.credit a{
+  color:var(--marigold);text-decoration:none;font-weight:800;
+  border-bottom:1.5px solid rgba(245,166,35,.4);padding-bottom:1px;
+}
+.credit a:active{opacity:.6}
+
+/* ============ icon bar ============ */
+.iconbar{display:flex;gap:7px;margin-bottom:12px}
+.ib{flex:1;width:auto;margin:0;padding:9px 4px 7px;font-size:17px;line-height:1.1;
+  background:rgba(0,0,0,.24);color:var(--paper);box-shadow:0 3px 0 rgba(0,0,0,.3);position:relative}
+.ib span{display:block;font-size:10px;font-weight:700;opacity:.65;margin-top:3px;letter-spacing:.3px}
+.ib em{position:absolute;top:3px;right:8px;background:var(--ink);color:#fff;font-style:normal;
+  font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:999px;
+  display:none;place-items:center;padding:0 4px}
+.ib em.on{display:grid;animation:pop .3s}
+
+/* ============ bottom sheets ============ */
+.sheet{position:fixed;inset:0;z-index:75;background:rgba(9,26,20,.6);
+  display:none;align-items:flex-end;justify-content:center}
+.sheet.on{display:flex;animation:fadein .2s}
+@keyframes fadein{0%{opacity:0}100%{opacity:1}}
+.sheetcard{
+  width:100%;max-width:520px;background:var(--baize);border-radius:20px 20px 0 0;
+  padding:14px 14px calc(18px + env(safe-area-inset-bottom));
+  border-top:4px solid var(--marigold);max-height:86vh;overflow-y:auto;
+  animation:slideup .3s cubic-bezier(.3,1,.4,1);
+}
+@keyframes slideup{0%{transform:translateY(100%)}100%{transform:translateY(0)}}
+.sheettop{display:flex;align-items:center;margin-bottom:13px}
+.sheettop b{flex:1;font-family:'Alfa Slab One',serif;font-weight:400;font-size:19px;color:var(--paper)}
+.sheettop .x{flex:0 0 36px;width:36px;height:36px;padding:0;margin:0;border-radius:50%;
+  background:rgba(0,0,0,.3);color:var(--paper);font-size:15px;box-shadow:none}
+
+/* ============ chat ============ */
+.feed{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow-y:auto;
+  margin-bottom:11px;padding-right:2px}
+.feed:empty::after{content:"Nobody has said anything yet.";display:block;text-align:center;
+  color:rgba(251,239,214,.4);font-size:13px;padding:22px 0;font-weight:600}
+.msg{background:rgba(0,0,0,.24);border-radius:11px;padding:9px 12px;font-size:14px;
+  color:rgba(251,239,214,.9);animation:pop .25s;word-break:break-word}
+.msg b{color:var(--marigold);font-weight:800;margin-right:5px}
+.msg.mine{background:var(--paper);color:var(--charcoal);align-self:flex-end;max-width:88%}
+.msg.mine b{color:var(--ink)}
+.msg.sys{background:rgba(245,166,35,.16);color:#FFDFA8;font-size:13px;text-align:center;font-weight:700}
+.guessbar{display:flex;gap:8px}
+.guessbar input{margin:0;flex:1}
+.guessbar button{flex:0 0 78px;width:78px;margin:0}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.quick button{width:auto;flex:0 0 auto;margin:0;padding:9px 13px;font-size:14px;
+  background:rgba(0,0,0,.24);color:var(--paper);box-shadow:0 3px 0 rgba(0,0,0,.3)}
 
 /* ============ tap nudge ============ */
 .nudge{
@@ -534,8 +604,13 @@ summary::-webkit-details-marker{display:none}
 <div class="screen" id="sGame">
   <div class="top">
     <h1>Housie Night</h1>
-    <button class="mini" id="bHelp" aria-label="How to play" style="flex:0 0 40px;width:40px;padding:9px 0;font-size:16px">?</button>
     <div class="chip" id="chip"><b>90</b> left</div>
+  </div>
+  <div class="iconbar">
+    <button class="ib" id="bSettings">⚙<span>Controls</span></button>
+    <button class="ib" id="bChat">💬<span>Chat</span><em id="unread"></em></button>
+    <button class="ib" id="snd">🔊<span>Sound</span></button>
+    <button class="ib" id="bHelp">?<span>How to</span></button>
   </div>
   <div class="stage">
     <div class="drum" id="drum"></div>
@@ -544,24 +619,6 @@ summary::-webkit-details-marker{display:none}
     <div class="trail" id="trail"></div>
   </div>
   <div class="wonstrip" id="wonstrip"></div>
-  <div class="row" id="glangrow">
-    <div class="seg" role="group" aria-label="Calling language">
-      <button id="gHi" aria-pressed="false">हिंदी calls</button>
-      <button id="gEn" aria-pressed="true">English calls</button>
-    </div>
-  </div>
-  <div class="row" style="margin-top:12px">
-    <div class="seg" role="group" id="gseg">
-      <button id="gAuto" aria-pressed="true">Auto call</button>
-      <button id="gHost" aria-pressed="false">I'll call</button>
-    </div>
-    <button class="mini" id="snd" aria-label="Sound">🔊</button>
-  </div>
-  <select id="voice" aria-label="Caller voice"></select>
-  <div class="speed" id="gspeedBox">
-    <div class="slab"><span>Gap between calls</span><b id="gspeedVal">6s</b></div>
-    <input type="range" id="gspeed" min="3" max="20" step="1" value="6">
-  </div>
   <div class="controls"><button class="go" id="main">Start game</button></div>
   <div class="nudge" id="nudge"></div>
   <div class="ticket">
@@ -582,6 +639,62 @@ summary::-webkit-details-marker{display:none}
     <div class="board" id="board"></div>
   </details>
   <button class="ghost" id="bQuit">Leave game</button>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div class="screen" id="sResult">
+  <div class="hero" style="padding:20px 0 14px">
+    <div class="big" style="font-size:40px">GAME<br>OVER</div>
+    <p id="resTop">—</p>
+  </div>
+
+  <div class="reslist" id="resPrizes"></div>
+
+  <div id="moneyWrap">
+    <div class="restitle">WHO WON WHAT</div>
+    <div class="reslist" id="resMoney"></div>
+  </div>
+
+  <button class="go" id="bAgain">Play again — same players</button>
+  <button class="ghost" id="bDone">Leave room</button>
+</div>
+
+<div class="credit">
+  Developed by <a href="https://keekootech.in/" target="_blank" rel="noopener">Kee Koo Tech</a>
+</div>
+
+<div class="sheet" id="setSheet">
+  <div class="sheetcard">
+    <div class="sheettop"><b>Host controls</b><button class="x" data-close="setSheet">✕</button></div>
+    <div class="row" id="glangrow">
+      <div class="seg" role="group" aria-label="Calling language">
+        <button id="gHi" aria-pressed="false">हिंदी calls</button>
+        <button id="gEn" aria-pressed="true">English calls</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="seg" role="group" id="gseg">
+        <button id="gAuto" aria-pressed="true">Auto call</button>
+        <button id="gHost" aria-pressed="false">I'll call</button>
+      </div>
+    </div>
+    <div class="speed" id="gspeedBox">
+      <div class="slab"><span>Gap between calls</span><b id="gspeedVal">6s</b></div>
+      <input type="range" id="gspeed" min="3" max="20" step="1" value="6">
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="chatSheet">
+  <div class="sheetcard">
+    <div class="sheettop"><b>Room chat</b><button class="x" data-close="chatSheet">✕</button></div>
+    <div class="feed" id="feed"></div>
+    <div class="guessbar">
+      <input id="chatIn" placeholder="Say something…" maxlength="120" autocomplete="off">
+      <button class="gold" id="bSend">Send</button>
+    </div>
+    <div class="quick" id="quick"></div>
+  </div>
 </div>
 
 <div class="tour" id="tour">
@@ -717,21 +830,21 @@ function blip(f,d,type,vol){if(!sound)return;
 function fanfare(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>blip(f,.28,'square',.13),i*95))}
 function buzz(){blip(150,.22,'sawtooth',.14);setTimeout(()=>blip(110,.26,'sawtooth',.14),110)}
 
-let voices=[],voice=null,lang='en',voiceManual=false;
+let voices=[],voice=null,lang='en';
 
+/* one voice per language, chosen automatically — lower is better */
 function scoreVoice(v,want){
   const l=(v.lang||'').toLowerCase(),n=v.name||'';
   if(want==='hi'){
-    if(l.startsWith('hi'))return 0;
-    if(/lekha|rishi|kalpana|hindi/i.test(n))return 1;
-    if(l.startsWith('en-in'))return 2;
-    if(/india/i.test(n))return 3;
+    if(l.startsWith('hi'))return /lekha|google/i.test(n)?0:1;
+    if(/lekha|kalpana|hindi/i.test(n))return 2;
+    if(l.startsWith('en-in'))return 3;
     return 9;
   }
-  if(l.startsWith('en-in'))return 0;
-  if(/rishi|veena|india/i.test(n))return 1;
-  if(l.startsWith('en-gb'))return 2;
-  if(l.startsWith('en'))return 3;
+  if(l.startsWith('en-in'))return /rishi|veena|google/i.test(n)?0:1;
+  if(/rishi|veena|india/i.test(n))return 2;
+  if(l.startsWith('en-gb'))return 3;
+  if(l.startsWith('en'))return 4;
   return 9;
 }
 function loadVoices(){
@@ -739,22 +852,19 @@ function loadVoices(){
   voices=speechSynthesis.getVoices().slice();
   if(!voices.length)return;
   voices.sort((a,b)=>scoreVoice(a,lang)-scoreVoice(b,lang));
-  const s=$('voice');
-  s.innerHTML=voices.map((v,i)=>`<option value="${i}">${v.name.replace(/Microsoft |Google /,'')} · ${v.lang}</option>`).join('');
-  if(!voiceManual){voice=voices[0];s.value=0}
-  s.style.display=voices.length>1?'block':'none';
+  voice=voices[0];
+  log('voice: '+voice.name+' ('+voice.lang+')');
 }
 if(window.speechSynthesis){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
 
 let warnedNoHindi=false;
 function setLang(L,push){
-  lang=L;voiceManual=false;loadVoices();
+  lang=L;loadVoices();
   ['lHi','gHi'].forEach(id=>$(id)&&$(id).setAttribute('aria-pressed',L==='hi'));
   ['lEn','gEn'].forEach(id=>$(id)&&$(id).setAttribute('aria-pressed',L==='en'));
   if(L==='hi'&&voice&&!(voice.lang||'').toLowerCase().startsWith('hi')&&!warnedNoHindi){
     warnedNoHindi=true;
     toast('No Hindi voice on this phone — using the closest one');
-    log('no hi voice, fell back to '+(voice&&voice.lang));
   }
   if(push&&!solo&&room&&isHost)fx.set(R(`rooms/${room}/lang`),L).catch(()=>{});
 }
@@ -963,6 +1073,165 @@ function maybeTour(){
   setTimeout(startTour,700);
 }
 
+/* ================= chat ================= */
+let unread=0,chatOpen=false;
+const QUICK=['👏','😂','😱','Jaldi karo!','Bogey!','Ek aur','Kya baat hai'];
+
+function buildQuick(){
+  $('quick').innerHTML='';
+  QUICK.forEach(q=>{
+    const b=document.createElement('button');b.textContent=q;
+    b.onclick=()=>sendChat(q);
+    $('quick').appendChild(b);
+  });
+}
+function sendChat(text){
+  const t=(text||$('chatIn').value).trim().slice(0,120);
+  if(!t||!room||solo)return;
+  $('chatIn').value='';
+  fx.push(R(`rooms/${room}/chat`),{by:me.id,name:me.name,text:t,at:Date.now()})
+    .catch(e=>log('chat fail '+e.message,true));
+}
+function addMsg(m){
+  const d=document.createElement('div');
+  if(m.sys){d.className='msg sys';d.textContent=m.text}
+  else{
+    d.className='msg'+(m.by===me.id?' mine':'');
+    d.innerHTML=`<b>${esc(m.by===me.id?'You':m.name)}</b>${esc(m.text)}`;
+  }
+  const f=$('feed');
+  f.appendChild(d);f.scrollTop=f.scrollHeight;
+  while(f.children.length>60)f.removeChild(f.firstChild);
+  if(!chatOpen&&m.by!==me.id){
+    unread++;
+    const u=$('unread');u.textContent=unread>9?'9+':unread;u.classList.add('on');
+    blip(700,.07,'triangle',.08);
+  }
+}
+function openSheet(id){
+  $(id).classList.add('on');
+  if(id==='chatSheet'){
+    chatOpen=true;unread=0;$('unread').classList.remove('on');
+    setTimeout(()=>{$('feed').scrollTop=$('feed').scrollHeight},60);
+  }
+}
+function closeSheet(id){$(id).classList.remove('on');if(id==='chatSheet')chatOpen=false}
+
+$('bSettings').onclick=()=>{
+  if(!isHost&&!solo){toast('Only the host has these controls',true);return}
+  openSheet('setSheet');
+};
+$('bChat').onclick=()=>{
+  if(solo){toast('Chat needs other players',true);return}
+  openSheet('chatSheet');
+};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeSheet(b.dataset.close));
+document.querySelectorAll('.sheet').forEach(sh=>sh.onclick=e=>{if(e.target===sh)closeSheet(sh.id)});
+$('bSend').onclick=()=>sendChat();
+$('chatIn').onkeydown=e=>{if(e.key==='Enter')sendChat()};
+buildQuick();
+
+function newRoundReset(){
+  stopAuto();running=false;
+  ticket=newTicket();
+  if(!solo&&room)fx.set(R(`rooms/${room}/players/${me.id}/ticket`),encT(ticket)).catch(()=>{});
+  const b=$('ball');b.className='ball empty';b.textContent='?';
+  $('callline').textContent='Tap start — good luck';
+  $('trail').innerHTML='';$('wonstrip').innerHTML='';
+  drawTicket();drawClaims();drawBoard();drawTrail();
+  saveSession();
+}
+function enterLobbyAfterRematch(){
+  $('lobCode').textContent=room;
+  $('hostBox').style.display=isHost?'block':'none';
+  $('waitBox').style.display=isHost?'none':'block';
+  show('sLobby');
+  toast('New round — fresh tickets!');
+}
+
+/* ================= end of game ================= */
+function money(str){
+  if(!str)return 0;
+  const m=String(str).replace(/,/g,'').match(/\d+(\.\d+)?/);
+  return m?parseFloat(m[0]):0;
+}
+function currency(str){
+  const m=String(str||'').match(/[₹$£€]/);
+  return m?m[0]:'₹';
+}
+
+function showResults(){
+  clearInterval(timer);timer=null;running=false;
+  const won=PRIZES.filter(p=>claims[p.id]);
+
+  /* every prize, taken or not */
+  $('resPrizes').innerHTML=PRIZES.map(p=>{
+    const c=claims[p.id];
+    const val=prizes.on&&prizes[p.id]?prizes[p.id]:'';
+    if(!c)return `<div class="rrow none"><div class="rp">${p.n}<div class="rw">Nobody claimed it</div></div>
+      <div class="rv" style="color:inherit;opacity:.5">${esc(val)}</div></div>`;
+    return `<div class="rrow${c.by===me.id?' mine':''}">
+      <div class="rp">${p.n}<div class="rw">${c.by===me.id?'You':esc(c.name)}</div></div>
+      ${val?`<div class="rv">${esc(val)}</div>`:'<div class="rv">🏆</div>'}</div>`;
+  }).join('');
+
+  /* totals per player */
+  const tally={};
+  PRIZES.forEach(p=>{
+    const c=claims[p.id];if(!c)return;
+    if(!tally[c.by])tally[c.by]={name:c.name,cash:0,items:[],wins:0};
+    tally[c.by].wins++;
+    const val=prizes.on?prizes[p.id]:null;
+    if(val){
+      const n=money(val);
+      if(n)tally[c.by].cash+=n; else tally[c.by].items.push(val);
+    }
+  });
+  const cur=currency(PRIZES.map(p=>prizes[p.id]).find(v=>v&&money(v)));
+  const ranked=Object.entries(tally).sort((a,b)=>
+    (b[1].cash-a[1].cash)||(b[1].wins-a[1].wins));
+
+  const anyPrize=prizes.on&&PRIZES.some(p=>prizes[p.id]);
+  $('moneyWrap').classList.toggle('on',ranked.length>0);
+  $('resMoney').innerHTML=ranked.map(([id,t],i)=>{
+    let right='';
+    if(anyPrize){
+      const bits=[];
+      if(t.cash)bits.push(cur+t.cash);
+      if(t.items.length)bits.push(t.items.join(', '));
+      right=bits.join(' + ')||'—';
+    }else right=t.wins+'×🏆';
+    return `<div class="rrow${id===me.id?' mine':''}${i===0?' gold':''}">
+      <div class="rk">${i+1}</div>
+      <div class="rp">${id===me.id?'You':esc(t.name)}<div class="rw">${t.wins} prize${t.wins>1?'s':''}</div></div>
+      <div class="rv">${esc(right)}</div></div>`;
+  }).join('');
+
+  const winner=claims.full;
+  $('resTop').textContent=winner
+    ? (winner.by===me.id?'You called housie!':esc(winner.name)+' called housie!')
+    : 'All numbers called';
+
+  $('bAgain').style.display=(isHost||solo)?'block':'none';
+  show('sResult');
+  if(ranked[0]&&ranked[0][0]===me.id){setTimeout(()=>burst(110,18),300)}
+}
+
+async function playAgain(){
+  if(solo){
+    called=new Set();marked=new Set();claims={};ticket=newTicket();
+    $('ball').className='ball empty';$('ball').textContent='?';
+    $('callline').textContent='Tap start — good luck';
+    beginGame();return;
+  }
+  ticket=newTicket();
+  await fx.set(R(`rooms/${room}/players/${me.id}/ticket`),encT(ticket));
+  await fx.update(R('rooms/'+room),{
+    status:'lobby',called:null,claims:null,locked:false,chat:null
+  });
+  log('rematch');
+}
+
 let me={id:'p'+Math.random().toString(36).slice(2,9),name:'Player'};
 let room=null,isHost=false,solo=false,mode='auto',started=false;
 let ticket=null,marked=new Set(),called=new Set(),claims={},players={};
@@ -977,7 +1246,7 @@ function need(id){
   if(id==='corner'){const t=rowNums(0),b=rowNums(2);return[t[0],t[t.length-1],b[0],b[b.length-1]]}
   return[]}
 
-function show(id){['sHome','sSetup','sLobby','sGame'].forEach(s=>$(s).classList.toggle('on',s===id))}
+function show(id){['sHome','sSetup','sLobby','sGame','sResult'].forEach(s=>$(s).classList.toggle('on',s===id))}
 function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');
   clearTimeout(t._h);t._h=setTimeout(()=>t.className='toast',2600)}
 
@@ -1054,6 +1323,16 @@ function listen(){
   unsub.push(fx.onValue(R(`rooms/${room}/status`),s=>{
     const st=s.val();
     if(st==='playing'&&!started){started=true;beginGame()}
+    if(st==='done'&&started){setTimeout(showResults,3200)}
+    if(st==='lobby'&&started){                 /* host called a rematch */
+      started=false;
+      called=new Set();marked=new Set();claims={};announced={};
+      newRoundReset();
+      enterLobbyAfterRematch();
+    }
+  }));
+  unsub.push(fx.onChildAdded(R(`rooms/${room}/chat`),s=>{
+    const m=s.val();if(m)addMsg(m);
   }));
   unsub.push(fx.onValue(R(`rooms/${room}/prizes`),s=>{
     const v=s.val()||{};
@@ -1111,6 +1390,8 @@ function announce(p,v){
     setTimeout(()=>burst(120,20),400);setTimeout(()=>burst(120,20),900);
     document.body.classList.add('shake');
     setTimeout(()=>document.body.classList.remove('shake'),500);
+    setTimeout(showResults,3200);          /* let the confetti land first */
+    if(isHost&&!solo)fx.update(R('rooms/'+room),{status:'done'}).catch(()=>{});
   }
 }
 
@@ -1363,6 +1644,8 @@ function stopAuto(){clearInterval(timer);timer=null;running=false;
 function syncModeUI(){
   const canCall=isHost||solo;
   $('gseg').style.display=canCall?'flex':'none';
+  $('bSettings').style.display=canCall?'block':'none';
+  $('bChat').style.display=solo?'none':'block';
   $('glangrow').style.display=canCall?'flex':'none';
   $('gspeedBox').style.display=canCall&&mode==='auto'?'block':'none';
   const sb=$('speedBox');if(sb)sb.style.display=mode==='auto'?'block':'none';
@@ -1446,6 +1729,8 @@ $('prizeSw').onclick=()=>{
 
 $('bLock').onclick=()=>toggleLock().catch(e=>log('lock fail '+e.message,true));
 $('bStart').onclick=()=>startGame().catch(e=>log('start fail '+e.message,true));
+$('bAgain').onclick=()=>playAgain().catch(e=>{log('rematch fail '+e.message,true);toast('Could not restart',true)});
+$('bDone').onclick=leave;
 $('bLeave').onclick=leave;
 $('bQuit').onclick=leave;
 
@@ -1508,9 +1793,9 @@ $('main').onclick=()=>{
   updateMainBtn();
 };
 
-$('snd').onclick=()=>{sound=!sound;$('snd').textContent=sound?'🔊':'🔇';
+$('snd').onclick=()=>{sound=!sound;
+  $('snd').innerHTML=(sound?'🔊':'🔇')+'<span>Sound</span>';
   if(!sound&&window.speechSynthesis)speechSynthesis.cancel()};
-$('voice').onchange=e=>{voiceManual=true;voice=voices[e.target.value];preview()};
 
 $('codeIn').oninput=e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'')};
 

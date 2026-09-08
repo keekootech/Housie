@@ -1273,9 +1273,16 @@ async function hostGame(){
     code=code4();
   }
   ticket=newTicket();
-  await fx.set(R('rooms/'+code),{
-    host:me.id,status:'lobby',mode:'auto',lang:'en',gap:6,created:Date.now(),
-    players:{[me.id]:{name:me.name,ticket:encT(ticket),joined:Date.now()}}
+  await fx.update(R('rooms/'+code),{
+    'host':me.id,
+    'status':'lobby',
+    'mode':'auto',
+    'lang':'en',
+    'gap':6,
+    'created':Date.now(),
+    [`players/${me.id}/name`]:me.name,
+    [`players/${me.id}/ticket`]:encT(ticket),
+    [`players/${me.id}/joined`]:Date.now()
   });
   room=code;isHost=true;solo=false;
   log('hosted room '+code);

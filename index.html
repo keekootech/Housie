@@ -512,6 +512,7 @@ summary::-webkit-details-marker{display:none}
   padding:8px 10px 30px;z-index:70;display:none;white-space:pre-wrap;line-height:1.4}
 #dbg .err{color:#FF8A8A}
 #dbgBtn{position:fixed;right:9px;bottom:9px;width:38px;height:38px;padding:0;border-radius:50%;
+  place-items:center;
   background:rgba(0,0,0,.45);color:#7FE3A8;font-size:15px;z-index:71;box-shadow:none;margin:0;opacity:.5}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -746,7 +747,28 @@ function log(m,bad){
   if(dbgEl.children.length>140)dbgEl.removeChild(dbgEl.firstChild);
 }
 $('dbgBtn').onclick=()=>{dbgOn=!dbgOn;dbgEl.style.display=dbgOn?'block':'none'};
-window.onerror=(m,s,l)=>{log('ERROR '+m+' @'+l,true);dbgEl.style.display='block';dbgOn=true};
+
+/* debug is hidden in normal use — reveal with ?debug=1 or 5 taps on the credit line */
+const debugWanted=new URLSearchParams(location.search).has('debug');
+$('dbgBtn').style.display=debugWanted?'grid':'none';
+let creditTaps=0,creditTimer=null;
+setTimeout(()=>{
+  const c=document.querySelector('.credit');
+  if(!c)return;
+  c.addEventListener('click',e=>{
+    if(e.target.tagName==='A')return;        /* let the real link work */
+    creditTaps++;
+    clearTimeout(creditTimer);
+    creditTimer=setTimeout(()=>creditTaps=0,1600);
+    if(creditTaps>=5){
+      creditTaps=0;
+      $('dbgBtn').style.display='grid';
+      dbgOn=true;dbgEl.style.display='block';
+      log('debug unlocked');
+    }
+  });
+},0);
+window.onerror=(m,s,l)=>{log('ERROR '+m+' @'+l,true)};
 window.onunhandledrejection=e=>{log('PROMISE '+(e.reason&&e.reason.message||e.reason),true)};
 log('booting');
 
